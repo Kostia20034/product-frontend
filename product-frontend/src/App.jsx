@@ -6,6 +6,7 @@ function App() {
     const [loading, setLoading] = useState(true)
     const [name, setName] = useState("")
     const [price, setPrice] = useState("")
+    const [search,setSearch] = useState("")
 
     useEffect(() => {
         fetch("http://localhost:8080/api/v1/products")
@@ -50,6 +51,12 @@ function App() {
         setProducts(products.map(p => p.id === id ? updated : p))
     })
 }
+    const searchProduct = () => {
+        fetch(`http://localhost:8080/api/v1/products/search?name=${search}`)
+        .then(r => r.json())
+        .then(data => {setProducts(data)
+        setSearch("")})
+    }
 
     if (loading) return (
         <div className="flex items-center justify-center h-screen">
@@ -66,7 +73,21 @@ function App() {
                     Product Store
                 </h1>
             </nav>
-
+        <div className="flex gap-2 mb-6">
+            <input
+                type="text"
+                placeholder="Search products..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="border rounded p-2 flex-1"
+            />
+            <button
+                onClick={searchProduct}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+                Search
+            </button>
+        </div>
             <div className="max-w-4xl mx-auto px-4">
 
                 {/* Create form */}
