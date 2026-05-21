@@ -9,6 +9,8 @@ function App() {
     const [price, setPrice] = useState("")
     const [search, setSearch] = useState("")
     const [token, setToken] = useState(localStorage.getItem("token"))
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     // reusable function
     const authHeader = () => ({
@@ -17,13 +19,14 @@ function App() {
     })
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/v1/products")
+        fetch(`http://localhost:8080/api/v1/products?page=${currentPage}&size=10`)
             .then(r => r.json())
             .then(data => {
-                setProducts(data)
+                setProducts(data.content)
+                setTotalPages(data.totalPages)
                 setLoading(false)
             })
-    }, [])
+    }, [currentPage])
 
     const handleLogin = (newToken) => {
         localStorage.setItem("token", newToken)  // save to localStorage
@@ -72,9 +75,10 @@ function App() {
     }
 
     const searchProducts = () => {
-        fetch(`http://localhost:8080/api/v1/products/search?name=${search}`)
+        fetch(`http://localhost:8080/api/v1/products/search?name=${search}&page=0&size=5`)
             .then(r => r.json())
-            .then(data => setProducts(data))
+            .then(data => {setProducts(data.content)
+                           setTotalPages(data.totalPages)})
     }
 
     // not logged in → show auth form
@@ -170,6 +174,27 @@ function App() {
                         />
                     ))}
                 </div>
+            </div>
+            <div className="flex justify-center items-center gap-4 mt-6 mb-6">
+                <button
+                    disabled={currentPage === 0}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    ← Previous
+                </button>
+
+                <span className="text-gray-600 font-medium">
+                    Page {currentPage + 1} of {totalPages}
+                </span>
+
+                <button
+                    disabled={currentPage === totalPages - 1}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Next →
+                </button>
             </div>
         </div>
     )
