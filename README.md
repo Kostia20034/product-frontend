@@ -1,22 +1,59 @@
 # 🛍️ Product Store — Frontend
 
-A React frontend for the Product API. Built to practice connecting a frontend to a real REST API.
+A React frontend for the Product API. Full stack product management app with JWT authentication, real-time CRUD operations, and pagination.
+
+## 🌐 Live Demo
+**https://product-frontend-vm4l.vercel.app**
+
+## 🔗 Backend API
+**https://product-api-production-949c.up.railway.app**
+
+---
 
 ## 🚀 Tech Stack
-- **React 18** + **Vite**
-- **Tailwind CSS** — utility-first styling
-- **JavaScript ES6+**
+
+| Technology | Purpose |
+|---|---|
+| React 19 + Vite | Frontend framework |
+| Tailwind CSS | Styling |
+| JavaScript ES6+ | Language |
+| Docker + Nginx | Containerization |
+| Vercel | Deployment |
+
+---
 
 ## ✨ Features
-- View all products
-- Create new product
-- Edit existing product
-- Delete product
-- Search products by name
-- Loading states
-- Connected to real Spring Boot REST API + PostgreSQL
+
+```
+✅ Login / Register with JWT authentication
+✅ Token stored in localStorage (persists on refresh)
+✅ Create, Edit, Delete products (protected)
+✅ Browse and Search products (public)
+✅ Pagination with Previous/Next navigation
+✅ Loading states
+✅ Error handling
+✅ Responsive design with Tailwind CSS
+✅ Connected to real Spring Boot REST API + PostgreSQL
+```
+
+---
+
+## 🐳 Run with Docker
+
+Make sure Docker Desktop is running and backend is started first:
+
+```bash
+# Start everything (frontend + backend + database)
+cd Product-api
+docker-compose up
+```
+
+Frontend runs at `http://localhost:3000` ✅
+
+---
 
 ## ⚙️ Run Locally
+
 **Prerequisites:** Node.js 18+
 
 ```bash
@@ -28,12 +65,32 @@ npm run dev
 
 App runs at `http://localhost:5173`
 
-Make sure the backend API is running at `http://localhost:8080`
+Make sure backend is running at `http://localhost:8080`
 
-Backend repo → [Product-api](https://github.com/Kostia20034/Product-api)
+---
+
+## 🏗️ Project Structure
+
+```
+src/
+├── App.jsx          # Main component — products page
+├── Auth.jsx         # Login/Register component
+├── ProductCard.jsx  # Individual product card with edit/delete
+├── config.js        # API URL configuration
+└── main.jsx         # Entry point
+```
+
+---
+
+## 🔗 Backend Repository
+[Product-api](https://github.com/Kostia20034/Product-api)
+
+---
 
 ## 🔮 Roadmap
-- [ ] Authentication UI (login/register)
-- [ ] Pagination
+
 - [ ] React Router (multiple pages)
-- [ ] Better error handling
+- [ ] Auto logout on token expiry
+- [ ] Better error messages
+- [ ] Loading spinners per action
+- [ ] Product categories
