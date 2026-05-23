@@ -11,6 +11,7 @@ function App() {
     const [token, setToken] = useState(localStorage.getItem("token"))
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const API_URL = "https://product-api-production-949c.up.railway.app"
 
     // reusable function
     const authHeader = () => ({
@@ -19,7 +20,7 @@ function App() {
     })
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/v1/products?page=${currentPage}&size=10`)
+        fetch(`${API_URL}/api/v1/products?page=${currentPage}&size=10`)
             .then(r => r.json())
             .then(data => {
                 setProducts(data.content)
@@ -39,7 +40,7 @@ function App() {
     }
 
     const deleteProduct = (id) => {
-        fetch(`http://localhost:8080/api/v1/products/${id}`, {
+        fetch(`${API_URL}/api/v1/products/${id}`, {
             method: "DELETE",
             headers: authHeader()  // ← send token
         })
@@ -49,7 +50,7 @@ function App() {
     }
 
     const createProduct = () => {
-        fetch("http://localhost:8080/api/v1/products", {
+        fetch(`${API_URL}/api/v1/products`, {
             method: "POST",
             headers: authHeader(),  // ← send token
             body: JSON.stringify({ name, price })
@@ -63,7 +64,7 @@ function App() {
     }
 
     const updateProduct = (id, name, price) => {
-        fetch(`http://localhost:8080/api/v1/products/${id}`, {
+        fetch(`${API_URL}/api/v1/products/${id}`, {
             method: "PUT",
             headers: authHeader(),  // ← send token
             body: JSON.stringify({ name, price })
@@ -75,7 +76,7 @@ function App() {
     }
 
     const searchProducts = () => {
-        fetch(`http://localhost:8080/api/v1/products/search?name=${search}&page=0&size=5`)
+        fetch(`${API_URL}/api/v1/products/search?name=${search}&page=0&size=5`)
             .then(r => r.json())
             .then(data => {setProducts(data.content)
                            setTotalPages(data.totalPages)})
@@ -124,7 +125,7 @@ function App() {
                     <button
                         onClick={() => {
                             setSearch("")
-                            fetch("http://localhost:8080/api/v1/products")
+                            fetch(`${API_URL}/api/v1/products`)
                                 .then(r => r.json())
                                 .then(data => setProducts(data))
                         }}
