@@ -1,4 +1,5 @@
 import { useState } from "react"
+import API_URL from "./config"
 
 function Auth({ onLogin }) { // function as a parameter
     const [isRegister, setIsRegister] = useState(false)
@@ -8,8 +9,8 @@ function Auth({ onLogin }) { // function as a parameter
 
     const handleSubmit = () => {
         const url = isRegister
-            ? "http://localhost:8080/api/v1/auth/register"
-            : "http://localhost:8080/api/v1/auth/login"
+            ? `${API_URL}/api/v1/auth/register`
+            : `${API_URL}/api/v1/auth/login`
 
         fetch(url, {
             method: "POST",

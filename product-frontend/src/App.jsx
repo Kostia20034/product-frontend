@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import ProductCard from "./ProductCard"
 import Auth from "./Auth"
+import API_URL from "./config"
 
 function App() {
     const [products, setProducts] = useState([])
@@ -11,7 +12,6 @@ function App() {
     const [token, setToken] = useState(localStorage.getItem("token"))
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const API_URL = "https://product-api-production-949c.up.railway.app"
 
     // reusable function
     const authHeader = () => ({
