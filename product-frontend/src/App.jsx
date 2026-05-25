@@ -6,6 +6,25 @@ import { Search, X, Plus, LogOut } from "lucide-react"
 import { Toaster, toast } from "react-hot-toast"
 import API_URL from "./config"
 
+function ProductCardSkeleton() {
+    return (
+        <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm animate-pulse flex justify-between items-start">
+            <div className="w-full">
+                {/* Fake icon box */}
+                <div className="w-12 h-12 bg-gray-200 rounded-xl mb-4"></div>
+                {/* Fake name strip */}
+                <div className="h-5 bg-gray-200 rounded-md w-3/4 mb-3"></div>
+                {/* Fake price strip */}
+                <div className="h-6 bg-gray-200 rounded-md w-1/4"></div>
+            </div>
+            <div className="flex flex-col gap-2">
+                <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
+                <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
+            </div>
+        </div>
+    )
+}
+
 function App() {
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
@@ -23,6 +42,7 @@ function App() {
     })
 
     useEffect(() => {
+        setLoading(true)
         fetch(`${API_URL}/api/v1/products?page=${currentPage}&size=10`)
             .then(r => r.json())
             .then(data => {
@@ -117,15 +137,6 @@ function App() {
     // not logged in → show auth form
     if (!token) return <Auth onLogin={handleLogin} />
 
-    if (loading) return (
-         <div className="flex items-center justify-center h-screen bg-gray-50">
-            <div className="text-center">
-                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-500 font-medium">Loading products...</p>
-            </div>
-        </div>
-    )
-
     return (
         <div className="min-h-screen bg-gray-100">
             <Toaster position="top-right" />
@@ -212,12 +223,18 @@ function App() {
                     </div>
                 </div>
 
-                {/* Products grid */}
-                {products.length === 0 ? (
+                {loading ? (
+                    //Render 6 animated skeleton cards
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                            <ProductCardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : products.length === 0 ? (
+                    //Show empty state
                     <div className="text-center py-20">
                         <div className="text-6xl mb-4">📦</div>
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">No products yet</h3>
-                        <p className="text-gray-400">Add your first product above!!</p>
                     </div>
                 ) : (
                     <AnimatePresence>
