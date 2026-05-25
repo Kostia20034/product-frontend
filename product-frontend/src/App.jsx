@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import ProductCard from "./ProductCard"
 import Auth from "./Auth"
+import { motion, AnimatePresence } from "framer-motion"
+import { Search, X, Plus, LogOut } from "lucide-react"
+import { Toaster, toast } from "react-hot-toast"
 import API_URL from "./config"
 
 function App() {
@@ -32,11 +35,13 @@ function App() {
     const handleLogin = (newToken) => {
         localStorage.setItem("token", newToken)  // save to localStorage
         setToken(newToken)
+        toast.success("Welcome back!! 🤴")
     }
 
     const handleLogout = () => {
         localStorage.removeItem("token")
         setToken(null)
+        toast.success("Logged out successfully")
     }
 
     const deleteProduct = (id) => {
@@ -46,10 +51,16 @@ function App() {
         })
         .then(() => {
             setProducts(products.filter(p => p.id !== id))
+            toast.success("Product deleted!! 👌")
         })
+        .catch(() => toast.error("Failed to delete product"))
     }
 
     const createProduct = () => {
+        if (!name || !price) {
+            toast.error("Please fill in all fields")
+            return
+        }
         fetch(`${API_URL}/api/v1/products`, {
             method: "POST",
             headers: authHeader(),  // ← send token
@@ -60,7 +71,9 @@ function App() {
             setProducts([...products, newProduct])
             setName("")
             setPrice("")
+            toast.success("Product created!! 🎉")
         })
+        .catch(() => toast.error("Failed to create product"))
     }
 
     const updateProduct = (id, name, price) => {
@@ -72,130 +85,186 @@ function App() {
         .then(r => r.json())
         .then(updated => {
             setProducts(products.map(p => p.id === id ? updated : p))
+            toast.success("Product updated!!")
         })
+        .catch(() => toast.error("Failed to update product"))
     }
 
     const searchProducts = () => {
+        if (!search) {
+            toast.error("Enter a search term")
+            return
+        }
         fetch(`${API_URL}/api/v1/products/search?name=${search}&page=0&size=5`)
             .then(r => r.json())
             .then(data => {setProducts(data.content)
-                           setTotalPages(data.totalPages)})
+                           setTotalPages(data.totalPages)
+            if (data.content.length === 0) toast.error("No products found")
+                else toast.success(`Found ${data.content.length} products!!`)
+            })
+    }
+    const clearSearch = () => {
+        setSearch("")
+        setCurrentPage(0)
+        fetch(`${API_URL}/api/v1/products?page=0&size=10`)
+            .then(r => r.json())
+            .then(data => {
+                setProducts(data.content)
+                setTotalPages(data.totalPages)
+            })
     }
 
     // not logged in → show auth form
     if (!token) return <Auth onLogin={handleLogin} />
 
     if (loading) return (
-        <div className="flex items-center justify-center h-screen">
-            <p className="text-xl text-gray-500">Loading...</p>
+         <div className="flex items-center justify-center h-screen bg-gray-50">
+            <div className="text-center">
+                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-500 font-medium">Loading products...</p>
+            </div>
         </div>
     )
 
     return (
         <div className="min-h-screen bg-gray-100">
+            <Toaster position="top-right" />
 
             {/* Navbar */}
-            <nav className="bg-white shadow p-4 mb-8 flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-blue-600">Product Store</h1>
+            <nav className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">P</span>
+                    </div>
+                    <h1 className="text-xl font-bold text-gray-900">ProductHub</h1>
+                </div>
                 <button
                     onClick={handleLogout}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors px-3 py-2 rounded-lg hover:bg-red-50"
                 >
-                    Logout
+                    <LogOut size={18} />
+                    <span className="text-sm font-medium">Logout</span>
                 </button>
             </nav>
 
-            <div className="max-w-4xl mx-auto px-4">
+            <div className="max-w-6xl mx-auto px-6 py-8">
 
-                {/* Search */}
-                <div className="flex gap-2 mb-6">
-                    <input
-                        type="text"
-                        placeholder="Search products..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        className="border rounded p-2 flex-1"
-                    />
+        {/* Search bar */}
+                <div className="flex gap-3 mb-8">
+                    <div className="relative flex-1">
+                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            onKeyDown={e => e.key === "Enter" && searchProducts()}
+                            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                        />
+                    </div>
                     <button
                         onClick={searchProducts}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors font-medium"
                     >
                         Search
                     </button>
-                    <button
-                        onClick={() => {
-                            setSearch("")
-                            fetch(`${API_URL}/api/v1/products`)
-                                .then(r => r.json())
-                                .then(data => setProducts(data))
-                        }}
-                        className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-                    >
-                        Clear
-                    </button>
+                    {search && (
+                        <button
+                            onClick={clearSearch}
+                            className="flex items-center gap-1 text-gray-500 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                        >
+                            <X size={16} />
+                            Clear
+                        </button>
+                    )}
                 </div>
 
-                {/* Create form — only show if logged in */}
-                <div className="bg-white rounded-lg shadow p-6 mb-8">
-                    <h2 className="text-lg font-semibold mb-4">Add New Product</h2>
-                    <div className="flex gap-4">
+                {/* Create form */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8 shadow-sm">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Plus size={20} className="text-indigo-600" />
+                        Add New Product
+                    </h2>
+                    <div className="flex gap-3">
                         <input
                             type="text"
                             placeholder="Product name"
                             value={name}
                             onChange={e => setName(e.target.value)}
-                            className="border rounded p-2 flex-1"
+                            onKeyDown={e => e.key === "Enter" && createProduct()}
+                            className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                         <input
                             type="number"
                             placeholder="Price"
                             value={price}
                             onChange={e => setPrice(e.target.value)}
-                            className="border rounded p-2 w-32"
+                            onKeyDown={e => e.key === "Enter" && createProduct()}
+                            className="w-36 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                         <button
                             onClick={createProduct}
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2"
                         >
-                            Add Product
+                            <Plus size={18} />
+                            Add
                         </button>
                     </div>
                 </div>
 
-                {/* Products */}
-                <div className="grid grid-cols-3 gap-4">
-                    {products.map(product => (
-                        <ProductCard
-                            key={product.id}
-                            id={product.id}
-                            name={product.name}
-                            price={product.price}
-                            onDelete={deleteProduct}
-                            onUpdate={updateProduct}
-                        />
-                    ))}
-                </div>
-            </div>
-            <div className="flex justify-center items-center gap-4 mt-6 mb-6">
-                <button
-                    disabled={currentPage === 0}
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    ← Previous
-                </button>
+                {/* Products grid */}
+                {products.length === 0 ? (
+                    <div className="text-center py-20">
+                        <div className="text-6xl mb-4">📦</div>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">No products yet</h3>
+                        <p className="text-gray-400">Add your first product above!!</p>
+                    </div>
+                ) : (
+                    <AnimatePresence>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {products.map((product, index) => (
+                                <motion.div
+                                    key={product.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ delay: index * 0.05 }}
+                                >
+                                    <ProductCard
+                                        id={product.id}
+                                        name={product.name}
+                                        price={product.price}
+                                        onDelete={deleteProduct}
+                                        onUpdate={updateProduct}
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
+                    </AnimatePresence>
+                )}
 
-                <span className="text-gray-600 font-medium">
-                    Page {currentPage + 1} of {totalPages}
-                </span>
-
-                <button
-                    disabled={currentPage === totalPages - 1}
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Next →
-                </button>
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-4 mt-8">
+                        <button
+                            disabled={currentPage === 0}
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
+                        >
+                            ← Previous
+                        </button>
+                        <span className="text-gray-500 text-sm font-medium">
+                            Page {currentPage + 1} of {totalPages}
+                        </span>
+                        <button
+                            disabled={currentPage === totalPages - 1}
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
+                        >
+                            Next →
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )
