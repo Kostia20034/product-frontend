@@ -48,7 +48,10 @@ function App() {
             .then(data => {
                 setProducts(data.content)
                 setTotalPages(data.totalPages)
-                setLoading(false)
+                setTimeout(() => {
+                    //check if skeleon works
+                setLoading(false) // Turns off after 2000 milliseconds
+            }, 2000)
             })
     }, [currentPage])
 
