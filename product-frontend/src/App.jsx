@@ -51,7 +51,7 @@ function App() {
                 setTimeout(() => {
                     //check if skeleon works
                 setLoading(false) // Turns off after 2000 milliseconds
-            }, 2000)
+            }, 500)
             })
     }, [currentPage])
 
